@@ -5,28 +5,26 @@ export const globalBrainstormingPath = () => 'brainstorming.md';
 
 export const projectDir = (slug: string) => `${ROOT}/${slug}`;
 export const archiveProjectDir = (slug: string, stamp: string) => `${ARCHIVE_ROOT}/${slug}-${stamp}`;
+
 export const projectMetaPath = (slug: string) => `${projectDir(slug)}/project.json`;
 export const outlinePath = (slug: string) => `${projectDir(slug)}/outline.md`;
 export const projectBrainstormPath = (slug: string) => `${projectDir(slug)}/brainstorming.md`;
+export const charactersPath = (slug: string) => `${projectDir(slug)}/characters.md`;
+export const scenesPath = (slug: string) => `${projectDir(slug)}/scenes.md`;
+export const locationsPath = (slug: string) => `${projectDir(slug)}/locations.md`;
+export const visualsPath = (slug: string) => `${projectDir(slug)}/visuals.md`;
+export const musicPath = (slug: string) => `${projectDir(slug)}/music.md`;
 
-export const charactersDir = (slug: string) => `${projectDir(slug)}/characters`;
-export const scenesDir = (slug: string) => `${projectDir(slug)}/scenes`;
-export const locationsDir = (slug: string) => `${projectDir(slug)}/locations`;
-export const visualsDir = (slug: string) => `${projectDir(slug)}/visuals`;
-export const musicDir = (slug: string) => `${projectDir(slug)}/music`;
+export type TabKind = 'outline' | 'brainstorming' | 'characters' | 'scenes' | 'locations' | 'visuals' | 'music';
 
-export type EntityKind = 'characters' | 'scenes' | 'locations' | 'visuals' | 'music';
-
-export function entityDir(slug: string, kind: EntityKind): string {
+export function tabPath(slug: string, kind: TabKind): string {
   switch (kind) {
-    case 'characters': return charactersDir(slug);
-    case 'scenes': return scenesDir(slug);
-    case 'locations': return locationsDir(slug);
-    case 'visuals': return visualsDir(slug);
-    case 'music': return musicDir(slug);
+    case 'outline': return outlinePath(slug);
+    case 'brainstorming': return projectBrainstormPath(slug);
+    case 'characters': return charactersPath(slug);
+    case 'scenes': return scenesPath(slug);
+    case 'locations': return locationsPath(slug);
+    case 'visuals': return visualsPath(slug);
+    case 'music': return musicPath(slug);
   }
-}
-
-export function entityPath(slug: string, kind: EntityKind, filename: string): string {
-  return `${entityDir(slug, kind)}/${filename}`;
 }

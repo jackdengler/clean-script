@@ -5,11 +5,17 @@ import { SaveStatus } from '../../components/Layout';
 import { MarkdownEditor } from '../../components/MarkdownEditor';
 import { useGithubFile, usePutFile } from '../../hooks/useGithubFile';
 import { useDebouncedSave } from '../../hooks/useDebouncedSave';
-import { outlinePath } from '../../lib/paths';
+import { tabPath, type TabKind } from '../../lib/paths';
 
-export function OutlineTab() {
+interface Props {
+  kind: TabKind;
+  placeholder?: string;
+  commitLabel: string;
+}
+
+export function MarkdownTab({ kind, placeholder, commitLabel }: Props) {
   const { slug = '' } = useParams();
-  const path = outlinePath(slug);
+  const path = tabPath(slug, kind);
   const { data, isLoading } = useGithubFile(path);
   const put = usePutFile();
   const [text, setText] = useState('');
@@ -28,7 +34,7 @@ export function OutlineTab() {
     initial,
     enabled: initial !== null,
     onSave: async (v) => {
-      await put.mutateAsync({ path, content: v, message: `update outline for ${slug}` });
+      await put.mutateAsync({ path, content: v, message: `${commitLabel} for ${slug}` });
     },
   });
 
@@ -37,7 +43,7 @@ export function OutlineTab() {
       {isLoading && initial === null ? (
         <div className="text-sm text-neutral-500">Loading…</div>
       ) : (
-        <MarkdownEditor value={text} onChange={setText} minRows={24} />
+        <MarkdownEditor value={text} onChange={setText} placeholder={placeholder} minRows={24} />
       )}
     </ProjectLayout>
   );

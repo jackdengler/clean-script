@@ -8,12 +8,7 @@ import { Settings } from './pages/Settings';
 import { ProjectList } from './pages/ProjectList';
 import { GlobalBrainstorming } from './pages/GlobalBrainstorming';
 import { NewProject } from './pages/NewProject';
-import { OutlineTab } from './pages/tabs/OutlineTab';
-import { BrainstormingTab } from './pages/tabs/BrainstormingTab';
-import { EntityListTab } from './pages/tabs/EntityListTab';
-import { EntityEditorTab } from './pages/tabs/EntityEditorTab';
-import { ScenesTab } from './pages/tabs/ScenesTab';
-import { SceneEditorTab } from './pages/tabs/SceneEditorTab';
+import { MarkdownTab } from './pages/tabs/MarkdownTab';
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -66,23 +61,13 @@ function Shell() {
       <Route path="/settings" element={<Settings />} />
 
       <Route path="/p/:slug" element={<Navigate to="outline" replace />} />
-      <Route path="/p/:slug/outline" element={<OutlineTab />} />
-      <Route path="/p/:slug/brainstorming" element={<BrainstormingTab />} />
-
-      <Route path="/p/:slug/characters" element={<EntityListTab kind="characters" singular="character" emptyLabel="No characters yet." />} />
-      <Route path="/p/:slug/characters/:id" element={<EntityEditorTab kind="characters" singular="character" bodyLabel="Backstory, voice, notes" />} />
-
-      <Route path="/p/:slug/scenes" element={<ScenesTab />} />
-      <Route path="/p/:slug/scenes/:id" element={<SceneEditorTab />} />
-
-      <Route path="/p/:slug/locations" element={<EntityListTab kind="locations" singular="location" emptyLabel="No locations yet." />} />
-      <Route path="/p/:slug/locations/:id" element={<EntityEditorTab kind="locations" singular="location" bodyLabel="Description, mood, details" />} />
-
-      <Route path="/p/:slug/visuals" element={<EntityListTab kind="visuals" singular="visual" emptyLabel="No visuals yet. Paste an image URL." view="grid" />} />
-      <Route path="/p/:slug/visuals/:id" element={<EntityEditorTab kind="visuals" singular="visual" bodyLabel="Notes" bodyPlaceholder="Why this image? What does it evoke?" />} />
-
-      <Route path="/p/:slug/music" element={<EntityListTab kind="music" singular="music" emptyLabel="No music yet." />} />
-      <Route path="/p/:slug/music/:id" element={<EntityEditorTab kind="music" singular="music" bodyLabel="Notes" bodyPlaceholder="Why this track? When does it play?" />} />
+      <Route path="/p/:slug/outline" element={<MarkdownTab kind="outline" commitLabel="update outline" />} />
+      <Route path="/p/:slug/brainstorming" element={<MarkdownTab kind="brainstorming" commitLabel="update brainstorming" placeholder="Themes, what-ifs, half-ideas. Use bullets — hit return to add more." />} />
+      <Route path="/p/:slug/characters" element={<MarkdownTab kind="characters" commitLabel="update characters" />} />
+      <Route path="/p/:slug/scenes" element={<MarkdownTab kind="scenes" commitLabel="update scenes" />} />
+      <Route path="/p/:slug/locations" element={<MarkdownTab kind="locations" commitLabel="update locations" />} />
+      <Route path="/p/:slug/visuals" element={<MarkdownTab kind="visuals" commitLabel="update visuals" />} />
+      <Route path="/p/:slug/music" element={<MarkdownTab kind="music" commitLabel="update music" />} />
 
       <Route path="*" element={<Navigate to="/" replace />} />
     </Routes>

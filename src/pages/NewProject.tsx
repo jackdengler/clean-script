@@ -5,8 +5,25 @@ import { Layout } from '../components/Layout';
 import { useClient } from '../context/ConfigContext';
 import { slugify } from '../lib/slug';
 import { TEMPLATES, templateById, type TemplateId } from '../lib/templates';
+import {
+  charactersTemplate,
+  locationsTemplate,
+  musicTemplate,
+  scenesTemplate,
+  visualsTemplate,
+} from '../lib/tabTemplates';
 import { newProjectMeta } from '../lib/project';
-import { ROOT, projectMetaPath, outlinePath, projectBrainstormPath } from '../lib/paths';
+import {
+  ROOT,
+  charactersPath,
+  locationsPath,
+  musicPath,
+  outlinePath,
+  projectBrainstormPath,
+  projectMetaPath,
+  scenesPath,
+  visualsPath,
+} from '../lib/paths';
 import { uniqueSlugInDir } from '../lib/unique';
 
 export function NewProject() {
@@ -27,9 +44,15 @@ export function NewProject() {
       const slug = await uniqueSlugInDir(client, ROOT, slugify(title));
       const meta = newProjectMeta({ slug, title, logline, template });
       const tpl = templateById(template);
-      await client.putFile(projectMetaPath(slug), JSON.stringify(meta, null, 2) + '\n', `create project ${slug}`);
-      await client.putFile(outlinePath(slug), tpl.body, `seed outline for ${slug}`);
-      await client.putFile(projectBrainstormPath(slug), '', `init brainstorming for ${slug}`);
+      const msg = `create project ${slug}`;
+      await client.putFile(projectMetaPath(slug), JSON.stringify(meta, null, 2) + '\n', msg);
+      await client.putFile(outlinePath(slug), tpl.body, msg);
+      await client.putFile(projectBrainstormPath(slug), '', msg);
+      await client.putFile(charactersPath(slug), charactersTemplate, msg);
+      await client.putFile(scenesPath(slug), scenesTemplate, msg);
+      await client.putFile(locationsPath(slug), locationsTemplate, msg);
+      await client.putFile(visualsPath(slug), visualsTemplate, msg);
+      await client.putFile(musicPath(slug), musicTemplate, msg);
       qc.invalidateQueries({ queryKey: ['projects'] });
       navigate(`/p/${slug}/outline`);
     } catch (e: unknown) {
