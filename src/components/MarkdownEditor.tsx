@@ -26,9 +26,22 @@ export function MarkdownEditor({ value, onChange, placeholder, minRows = 14 }: P
 
   function setSelection(el: HTMLTextAreaElement, start: number, end: number) {
     requestAnimationFrame(() => {
+      el.focus();
       el.selectionStart = start;
       el.selectionEnd = end;
     });
+  }
+
+  function handleChange(next: string) {
+    // First character into an empty field: seed a bullet so the user sees one immediately.
+    if (value === '' && next !== '' && !next.startsWith('- ')) {
+      const seeded = '- ' + next;
+      onChange(seeded);
+      const el = ref.current;
+      if (el) setSelection(el, seeded.length, seeded.length);
+      return;
+    }
+    onChange(next);
   }
 
   function handleEnter(e: KeyboardEvent<HTMLTextAreaElement>) {
@@ -40,15 +53,15 @@ export function MarkdownEditor({ value, onChange, placeholder, minRows = 14 }: P
     const lineStart = before.lastIndexOf('\n') + 1;
     const currentLine = before.slice(lineStart);
     const bullet = matchBulletPrefix(currentLine);
+
     if (!bullet) {
-      // Seed a bullet on an empty first line so everything stays bulleted.
-      if (value.trim() === '') {
-        e.preventDefault();
-        const insert = '- ';
-        const newValue = insert + '\n- ';
-        onChange(newValue);
-        setSelection(el, newValue.length, newValue.length);
-      }
+      // No bullet on this line — start one on the next line anyway.
+      e.preventDefault();
+      const insert = '\n- ';
+      const newValue = before + insert + after;
+      const newCaret = start + insert.length;
+      onChange(newValue);
+      setSelection(el, newCaret, newCaret);
       return;
     }
 
@@ -115,16 +128,68 @@ export function MarkdownEditor({ value, onChange, placeholder, minRows = 14 }: P
     setSelection(el, newStart, newEnd);
   }
 
+  function onToolbarIndent(outdent: boolean) {
+    const el = ref.current;
+    if (!el) return;
+    el.focus();
+    applyIndent(el, outdent);
+  }
+
+  function onToolbarNewBullet() {
+    const el = ref.current;
+    if (!el) return;
+    el.focus();
+    const start = el.selectionStart;
+    const end = el.selectionEnd;
+    const before = value.slice(0, start);
+    const after = value.slice(end);
+    const atLineStart = start === 0 || before.endsWith('\n');
+    const prefix = atLineStart ? '' : '\n';
+    const insert = `${prefix}- `;
+    const newValue = before + insert + after;
+    const newCaret = start + insert.length;
+    onChange(newValue);
+    setSelection(el, newCaret, newCaret);
+  }
+
   return (
-    <textarea
-      ref={ref}
-      className="input font-mono text-[14px] leading-relaxed"
-      rows={minRows}
-      value={value}
-      placeholder={placeholder}
-      onChange={(e) => onChange(e.target.value)}
-      onKeyDown={handleKeyDown}
-    />
+    <div className="space-y-2">
+      <div className="flex gap-1">
+        <button
+          type="button"
+          onClick={onToolbarNewBullet}
+          className="text-xs px-2 py-1 rounded bg-neutral-100 text-neutral-700 hover:bg-neutral-200"
+          aria-label="New bullet"
+        >
+          • New
+        </button>
+        <button
+          type="button"
+          onClick={() => onToolbarIndent(true)}
+          className="text-xs px-2 py-1 rounded bg-neutral-100 text-neutral-700 hover:bg-neutral-200"
+          aria-label="Outdent"
+        >
+          ← Outdent
+        </button>
+        <button
+          type="button"
+          onClick={() => onToolbarIndent(false)}
+          className="text-xs px-2 py-1 rounded bg-neutral-100 text-neutral-700 hover:bg-neutral-200"
+          aria-label="Indent"
+        >
+          → Indent
+        </button>
+      </div>
+      <textarea
+        ref={ref}
+        className="input font-mono text-[14px] leading-relaxed"
+        rows={minRows}
+        value={value}
+        placeholder={placeholder}
+        onChange={(e) => handleChange(e.target.value)}
+        onKeyDown={handleKeyDown}
+      />
+    </div>
   );
 }
 
