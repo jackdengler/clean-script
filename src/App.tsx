@@ -60,13 +60,11 @@ function Shell() {
       <Route path="/projects/new" element={<NewProject />} />
       <Route path="/settings" element={<Settings />} />
 
-      <Route path="/p/:slug" element={<Navigate to="outline" replace />} />
-      <Route path="/p/:slug/outline" element={<MarkdownTab kind="outline" commitLabel="update outline" />} />
+      <Route path="/p/:slug" element={<Navigate to="brainstorming" replace />} />
       <Route path="/p/:slug/brainstorming" element={<MarkdownTab kind="brainstorming" commitLabel="update brainstorming" placeholder="Themes, what-ifs, half-ideas. Use bullets — hit return to add more." />} />
       <Route path="/p/:slug/characters" element={<MarkdownTab kind="characters" commitLabel="update characters" />} />
       <Route path="/p/:slug/scenes" element={<MarkdownTab kind="scenes" commitLabel="update scenes" />} />
       <Route path="/p/:slug/locations" element={<MarkdownTab kind="locations" commitLabel="update locations" />} />
-      <Route path="/p/:slug/visuals" element={<MarkdownTab kind="visuals" commitLabel="update visuals" />} />
       <Route path="/p/:slug/music" element={<MarkdownTab kind="music" commitLabel="update music" />} />
 
       <Route path="*" element={<Navigate to="/" replace />} />

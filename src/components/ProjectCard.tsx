@@ -10,7 +10,7 @@ interface Props {
 export function ProjectCard({ project, onDelete, busy }: Props) {
   return (
     <div className="card relative hover:border-accent-400 transition-colors">
-      <Link to={`/p/${project.slug}/outline`} className="block pr-10">
+      <Link to={`/p/${project.slug}/brainstorming`} className="block pr-10">
         <div className="font-semibold text-neutral-900">{project.title || project.slug}</div>
         {project.logline && (
           <div className="text-sm text-neutral-600 mt-1 line-clamp-3">{project.logline}</div>
