@@ -7,12 +7,10 @@ interface TabDef {
 
 export function ProjectTabs({ slug }: { slug: string }) {
   const tabs: TabDef[] = [
-    { to: `/p/${slug}/outline`, label: 'Outline' },
     { to: `/p/${slug}/brainstorming`, label: 'Brainstorming' },
     { to: `/p/${slug}/characters`, label: 'Characters' },
     { to: `/p/${slug}/scenes`, label: 'Scenes' },
     { to: `/p/${slug}/locations`, label: 'Locations' },
-    { to: `/p/${slug}/visuals`, label: 'Visuals' },
     { to: `/p/${slug}/music`, label: 'Music' },
   ];
   return (
