@@ -9,6 +9,7 @@ import { useClient } from '../../context/ConfigContext';
 import { entityDir, entityPath, type EntityKind } from '../../lib/paths';
 import { parseMarkdown, stringifyMarkdown } from '../../lib/markdown';
 import { slugify } from '../../lib/slug';
+import { uniqueFilenameInDir } from '../../lib/unique';
 
 interface Props {
   kind: EntityKind;
@@ -33,11 +34,12 @@ export function EntityListTab({ kind, singular, newButtonLabel, emptyLabel, view
       const name = prompt(`Name the new ${singular}:`);
       if (!name) { setBusy(false); return; }
       const baseSlug = slugify(name);
-      const filename = `${baseSlug}.md`;
+      const filename = await uniqueFilenameInDir(client, dirPath, baseSlug);
+      const fileId = filename.replace(/\.md$/, '');
       const body = stringifyMarkdown({ title: name }, '\n');
       await client.putFile(entityPath(slug, kind, filename), body, `add ${singular} ${name}`);
       qc.invalidateQueries({ queryKey: ['dir', dirPath] });
-      navigate(`/p/${slug}/${kind}/${baseSlug}`);
+      navigate(`/p/${slug}/${kind}/${fileId}`);
     } catch (e: unknown) {
       alert((e as { message?: string })?.message ?? 'Failed to create');
     } finally {

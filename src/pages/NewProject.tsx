@@ -6,7 +6,8 @@ import { useClient } from '../context/ConfigContext';
 import { slugify } from '../lib/slug';
 import { TEMPLATES, templateById, type TemplateId } from '../lib/templates';
 import { newProjectMeta } from '../lib/project';
-import { projectMetaPath, outlinePath, projectBrainstormPath } from '../lib/paths';
+import { ROOT, projectMetaPath, outlinePath, projectBrainstormPath } from '../lib/paths';
+import { uniqueSlugInDir } from '../lib/unique';
 
 export function NewProject() {
   const navigate = useNavigate();
@@ -23,7 +24,7 @@ export function NewProject() {
     setBusy(true);
     setError(null);
     try {
-      const slug = slugify(title);
+      const slug = await uniqueSlugInDir(client, ROOT, slugify(title));
       const meta = newProjectMeta({ slug, title, logline, template });
       const tpl = templateById(template);
       await client.putFile(projectMetaPath(slug), JSON.stringify(meta, null, 2) + '\n', `create project ${slug}`);

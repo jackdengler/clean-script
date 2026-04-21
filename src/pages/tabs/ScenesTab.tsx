@@ -76,6 +76,7 @@ export function ScenesTab() {
     setItems(next);
     setBusy(true);
     try {
+      const moves: { oldFilename: string; newFilename: string; content: string }[] = [];
       for (let i = 0; i < next.length; i++) {
         const item = next[i];
         const newOrder = i + 1;
@@ -87,13 +88,18 @@ export function ScenesTab() {
         const parsed = parseMarkdown(file.content);
         parsed.frontmatter.number = newOrder;
         const newFilename = `${expectedPrefix}-${slugify(item.title)}.md`;
-        await client.deleteFile(entityPath(slug, 'scenes', item.filename), `reorder: remove ${item.filename}`);
-        await client.putFile(
-          entityPath(slug, 'scenes', newFilename),
-          stringifyMarkdown(parsed.frontmatter, parsed.body),
-          `reorder: add ${newFilename}`,
-        );
+        moves.push({
+          oldFilename: item.filename,
+          newFilename,
+          content: stringifyMarkdown(parsed.frontmatter, parsed.body),
+        });
         next[i] = { ...item, filename: newFilename, order: newOrder, id: newFilename.replace(/\.md$/, '') };
+      }
+      for (const m of moves) {
+        await client.deleteFile(entityPath(slug, 'scenes', m.oldFilename), `reorder: remove ${m.oldFilename}`);
+      }
+      for (const m of moves) {
+        await client.putFile(entityPath(slug, 'scenes', m.newFilename), m.content, `reorder: add ${m.newFilename}`);
       }
       setItems([...next]);
       qc.invalidateQueries({ queryKey: ['dir', dirPath] });
