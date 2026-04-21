@@ -78,25 +78,23 @@ export function RichEditor({ value, onChange, placeholder }: Props) {
 
   return (
     <LexicalComposer initialConfig={initialConfig}>
-      <div className="space-y-2">
-        <Toolbar />
-        <div className="relative">
-          <RichTextPlugin
-            contentEditable={<ContentEditable className="rich-editor" />}
-            placeholder={
-              <div className="pointer-events-none absolute top-3 left-4 text-neutral-400">
-                {placeholder ?? 'Start typing…'}
-              </div>
-            }
-            ErrorBoundary={LexicalErrorBoundary}
-          />
-          <HistoryPlugin />
-          <ListPlugin />
-          <TabIndentationPlugin />
-          <MarkdownShortcutPlugin transformers={TRANSFORMERS} />
-          <OnChangePlugin onChange={handleChange} ignoreSelectionChange />
-        </div>
+      <div className="relative pb-20">
+        <RichTextPlugin
+          contentEditable={<ContentEditable className="rich-editor" />}
+          placeholder={
+            <div className="pointer-events-none absolute top-3 left-4 text-neutral-400">
+              {placeholder ?? 'Start typing…'}
+            </div>
+          }
+          ErrorBoundary={LexicalErrorBoundary}
+        />
+        <HistoryPlugin />
+        <ListPlugin />
+        <TabIndentationPlugin />
+        <MarkdownShortcutPlugin transformers={TRANSFORMERS} />
+        <OnChangePlugin onChange={handleChange} ignoreSelectionChange />
       </div>
+      <Toolbar />
     </LexicalComposer>
   );
 }
@@ -105,7 +103,10 @@ function Toolbar() {
   const [editor] = useLexicalComposerContext();
   const btn = 'text-sm px-2.5 py-1.5 rounded-md bg-neutral-100 text-neutral-700 hover:bg-neutral-200 active:bg-neutral-300 transition-colors';
   return (
-    <div className="flex flex-wrap gap-1 sticky top-0 z-10 bg-neutral-50/80 backdrop-blur py-1 -mx-1 px-1">
+    <div
+      className="fixed left-0 right-0 bottom-0 z-30 flex flex-wrap gap-1 bg-white/95 backdrop-blur border-t border-neutral-200 px-3 py-2"
+      style={{ paddingBottom: 'calc(0.5rem + env(safe-area-inset-bottom))' }}
+    >
       <button
         type="button"
         className={`${btn} font-semibold`}
