@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { Layout, SaveStatus } from '../components/Layout';
-import { MarkdownEditor } from '../components/MarkdownEditor';
+import { RichEditor } from '../components/RichEditor';
 import { useGithubFile, usePutFile } from '../hooks/useGithubFile';
 import { useDebouncedSave } from '../hooks/useDebouncedSave';
 import { globalBrainstormingPath } from '../lib/paths';
@@ -39,11 +39,10 @@ export function GlobalBrainstorming() {
       {isLoading && initial === null ? (
         <div className="text-sm text-neutral-500">Loading…</div>
       ) : (
-        <MarkdownEditor
+        <RichEditor
           value={text}
           onChange={setText}
           placeholder="Write out any idea — a scene, a line, a what-if. No pressure, no project."
-          minRows={20}
         />
       )}
     </Layout>
