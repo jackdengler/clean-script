@@ -7,9 +7,10 @@ export function Setup() {
   const { setConfig } = useConfig();
   const navigate = useNavigate();
   const [token, setToken] = useState('');
-  const [owner, setOwner] = useState('');
-  const [repo, setRepo] = useState('');
+  const [owner, setOwner] = useState('jackdengler');
+  const [repo, setRepo] = useState('private-data-storage');
   const [branch, setBranch] = useState('main');
+  const [basePath, setBasePath] = useState('clean-script');
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -17,7 +18,13 @@ export function Setup() {
     e.preventDefault();
     setBusy(true);
     setError(null);
-    const config = { token: token.trim(), owner: owner.trim(), repo: repo.trim(), branch: branch.trim() || 'main' };
+    const config = {
+      token: token.trim(),
+      owner: owner.trim(),
+      repo: repo.trim(),
+      branch: branch.trim() || 'main',
+      basePath: basePath.trim().replace(/^\/+|\/+$/g, ''),
+    };
     const client = new GithubClient(config);
     const result = await client.verify();
     if (!result.ok) {
@@ -49,6 +56,11 @@ export function Setup() {
         <div>
           <label className="label" htmlFor="branch">Branch</label>
           <input id="branch" className="input" value={branch} onChange={(e) => setBranch(e.target.value)} placeholder="main" />
+        </div>
+        <div>
+          <label className="label" htmlFor="basePath">Folder (optional)</label>
+          <input id="basePath" className="input" value={basePath} onChange={(e) => setBasePath(e.target.value)} placeholder="e.g. clean-script" autoCapitalize="none" autoCorrect="off" />
+          <p className="text-xs text-neutral-500 mt-1">Store files in a subfolder of the repo. Leave blank to use the repo root.</p>
         </div>
         <div>
           <label className="label" htmlFor="token">Personal access token</label>

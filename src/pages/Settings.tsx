@@ -23,6 +23,7 @@ export function Settings() {
               <div className="flex justify-between"><dt className="text-neutral-500">Owner</dt><dd>{config.owner}</dd></div>
               <div className="flex justify-between"><dt className="text-neutral-500">Repo</dt><dd>{config.repo}</dd></div>
               <div className="flex justify-between"><dt className="text-neutral-500">Branch</dt><dd>{config.branch}</dd></div>
+              <div className="flex justify-between"><dt className="text-neutral-500">Folder</dt><dd>{config.basePath || '(root)'}</dd></div>
               <div className="flex justify-between"><dt className="text-neutral-500">Token</dt><dd>•••• stored on device</dd></div>
             </dl>
           ) : (

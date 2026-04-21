@@ -19,12 +19,19 @@ export class GithubClient {
   private owner: string;
   private repo: string;
   private branch: string;
+  private basePath: string;
 
   constructor(config: AppConfig) {
     this.octokit = new Octokit({ auth: config.token });
     this.owner = config.owner;
     this.repo = config.repo;
     this.branch = config.branch;
+    this.basePath = (config.basePath ?? '').replace(/^\/+/, '').replace(/\/+$/, '');
+  }
+
+  private absPath(path: string): string {
+    const clean = path.replace(/^\/+/, '');
+    return this.basePath ? `${this.basePath}/${clean}` : clean;
   }
 
   async getFile(path: string): Promise<FileData | null> {
@@ -32,7 +39,7 @@ export class GithubClient {
       const res = await this.octokit.repos.getContent({
         owner: this.owner,
         repo: this.repo,
-        path,
+        path: this.absPath(path),
         ref: this.branch,
       });
       const data = res.data;
@@ -50,7 +57,7 @@ export class GithubClient {
     await this.octokit.repos.createOrUpdateFileContents({
       owner: this.owner,
       repo: this.repo,
-      path,
+      path: this.absPath(path),
       message,
       content: encodeBase64(content),
       branch: this.branch,
@@ -64,7 +71,7 @@ export class GithubClient {
     await this.octokit.repos.deleteFile({
       owner: this.owner,
       repo: this.repo,
-      path,
+      path: this.absPath(path),
       message,
       sha: existing.sha,
       branch: this.branch,
@@ -76,13 +83,14 @@ export class GithubClient {
       const res = await this.octokit.repos.getContent({
         owner: this.owner,
         repo: this.repo,
-        path,
+        path: this.absPath(path),
         ref: this.branch,
       });
       if (!Array.isArray(res.data)) return [];
+      const prefixLen = this.basePath ? this.basePath.length + 1 : 0;
       return res.data.map((item) => ({
         name: item.name,
-        path: item.path,
+        path: prefixLen ? item.path.slice(prefixLen) : item.path,
         type: item.type === 'dir' ? 'dir' : 'file',
         sha: item.sha,
       }));

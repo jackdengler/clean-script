@@ -3,6 +3,7 @@ export interface AppConfig {
   owner: string;
   repo: string;
   branch: string;
+  basePath: string;
 }
 
 const KEY = 'movie-planner-config-v1';
@@ -18,6 +19,7 @@ export function loadConfig(): AppConfig | null {
       owner: parsed.owner,
       repo: parsed.repo,
       branch: parsed.branch || 'main',
+      basePath: normalizeBasePath(parsed.basePath ?? ''),
     };
   } catch {
     return null;
@@ -25,9 +27,13 @@ export function loadConfig(): AppConfig | null {
 }
 
 export function saveConfig(config: AppConfig) {
-  localStorage.setItem(KEY, JSON.stringify(config));
+  localStorage.setItem(KEY, JSON.stringify({ ...config, basePath: normalizeBasePath(config.basePath) }));
 }
 
 export function clearConfig() {
   localStorage.removeItem(KEY);
+}
+
+export function normalizeBasePath(p: string): string {
+  return (p ?? '').replace(/^\/+/, '').replace(/\/+$/, '');
 }
