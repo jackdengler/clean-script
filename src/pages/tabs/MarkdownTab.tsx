@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react';
 import { useParams } from 'react-router-dom';
 import { ProjectLayout } from '../../components/ProjectLayout';
 import { SaveStatus } from '../../components/Layout';
-import { MarkdownEditor } from '../../components/MarkdownEditor';
+import { RichEditor } from '../../components/RichEditor';
 import { useGithubFile, usePutFile } from '../../hooks/useGithubFile';
 import { useDebouncedSave } from '../../hooks/useDebouncedSave';
 import { tabPath, type TabKind } from '../../lib/paths';
@@ -62,7 +62,7 @@ function TabEditor({ slug, path, placeholder, commitLabel }: EditorProps) {
       {isLoading && initial === null ? (
         <div className="text-sm text-neutral-500">Loading…</div>
       ) : (
-        <MarkdownEditor value={text} onChange={setText} placeholder={placeholder} minRows={24} />
+        <RichEditor value={text} onChange={setText} placeholder={placeholder} />
       )}
     </ProjectLayout>
   );
