@@ -16,6 +16,25 @@ interface Props {
 export function MarkdownTab({ kind, placeholder, commitLabel }: Props) {
   const { slug = '' } = useParams();
   const path = tabPath(slug, kind);
+  return (
+    <TabEditor
+      key={path}
+      slug={slug}
+      path={path}
+      placeholder={placeholder}
+      commitLabel={commitLabel}
+    />
+  );
+}
+
+interface EditorProps {
+  slug: string;
+  path: string;
+  placeholder?: string;
+  commitLabel: string;
+}
+
+function TabEditor({ slug, path, placeholder, commitLabel }: EditorProps) {
   const { data, isLoading } = useGithubFile(path);
   const put = usePutFile();
   const [text, setText] = useState('');

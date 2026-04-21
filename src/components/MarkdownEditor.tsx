@@ -8,6 +8,18 @@ interface Props {
 }
 
 const INDENT = '  ';
+const BULLETS = ['●', '○', '◦'];
+const CIRCLE_CHARS = '●○◦';
+const LEGACY_CHARS = '-*+';
+
+function bulletFor(level: number): string {
+  return BULLETS[Math.min(Math.max(level, 0), BULLETS.length - 1)];
+}
+
+function isCircleMarker(marker: string): boolean {
+  const c = marker.trim();
+  return c.length === 1 && (CIRCLE_CHARS.includes(c) || LEGACY_CHARS.includes(c));
+}
 
 export function MarkdownEditor({ value, onChange, placeholder, minRows = 14 }: Props) {
   const ref = useRef<HTMLTextAreaElement | null>(null);
@@ -33,9 +45,8 @@ export function MarkdownEditor({ value, onChange, placeholder, minRows = 14 }: P
   }
 
   function handleChange(next: string) {
-    // First character into an empty field: seed a bullet so the user sees one immediately.
-    if (value === '' && next !== '' && !next.startsWith('- ')) {
-      const seeded = '- ' + next;
+    if (value === '' && next !== '' && !matchBulletPrefix(next)) {
+      const seeded = `${bulletFor(0)} ${next}`;
       onChange(seeded);
       const el = ref.current;
       if (el) setSelection(el, seeded.length, seeded.length);
@@ -55,9 +66,8 @@ export function MarkdownEditor({ value, onChange, placeholder, minRows = 14 }: P
     const bullet = matchBulletPrefix(currentLine);
 
     if (!bullet) {
-      // No bullet on this line — start one on the next line anyway.
       e.preventDefault();
-      const insert = '\n- ';
+      const insert = `\n${bulletFor(0)} `;
       const newValue = before + insert + after;
       const newCaret = start + insert.length;
       onChange(newValue);
@@ -69,8 +79,10 @@ export function MarkdownEditor({ value, onChange, placeholder, minRows = 14 }: P
     if (isEmpty) {
       e.preventDefault();
       if (bullet.indent.length >= INDENT.length) {
-        const newIndent = bullet.indent.slice(INDENT.length);
-        const newLine = newIndent + bullet.marker;
+        const newLevel = Math.floor(bullet.indent.length / INDENT.length) - 1;
+        const newIndent = INDENT.repeat(newLevel);
+        const newMarker = isCircleMarker(bullet.marker) ? `${bulletFor(newLevel)} ` : bullet.marker;
+        const newLine = newIndent + newMarker;
         const newValue = before.slice(0, lineStart) + newLine + after;
         const newCaret = lineStart + newLine.length;
         onChange(newValue);
@@ -85,7 +97,9 @@ export function MarkdownEditor({ value, onChange, placeholder, minRows = 14 }: P
     }
 
     e.preventDefault();
-    const insert = '\n' + bullet.indent + nextMarker(bullet.marker);
+    const level = Math.floor(bullet.indent.length / INDENT.length);
+    const marker = isCircleMarker(bullet.marker) ? `${bulletFor(level)} ` : nextMarker(bullet.marker);
+    const insert = '\n' + bullet.indent + marker;
     const newValue = before + insert + after;
     const newCaret = start + insert.length;
     onChange(newValue);
@@ -103,6 +117,20 @@ export function MarkdownEditor({ value, onChange, placeholder, minRows = 14 }: P
     let deltaFirst = 0;
     let deltaTotal = 0;
     const adjusted = lines.map((line, idx) => {
+      const bullet = matchBulletPrefix(line);
+      if (bullet) {
+        const rest = line.slice(bullet.indent.length + bullet.marker.length);
+        const currentLevel = Math.floor(bullet.indent.length / INDENT.length);
+        if (outdent && currentLevel === 0) return line;
+        const newLevel = outdent ? currentLevel - 1 : currentLevel + 1;
+        const newIndent = INDENT.repeat(newLevel);
+        const newMarker = isCircleMarker(bullet.marker) ? `${bulletFor(newLevel)} ` : bullet.marker;
+        const newLine = newIndent + newMarker + rest;
+        const delta = newLine.length - line.length;
+        if (idx === 0) deltaFirst += delta;
+        deltaTotal += delta;
+        return newLine;
+      }
       if (outdent) {
         let strip = 0;
         if (line.startsWith(INDENT)) strip = INDENT.length;
@@ -145,7 +173,7 @@ export function MarkdownEditor({ value, onChange, placeholder, minRows = 14 }: P
     const after = value.slice(end);
     const atLineStart = start === 0 || before.endsWith('\n');
     const prefix = atLineStart ? '' : '\n';
-    const insert = `${prefix}- `;
+    const insert = `${prefix}${bulletFor(0)} `;
     const newValue = before + insert + after;
     const newCaret = start + insert.length;
     onChange(newValue);
@@ -161,7 +189,7 @@ export function MarkdownEditor({ value, onChange, placeholder, minRows = 14 }: P
           className="text-xs px-2 py-1 rounded bg-neutral-100 text-neutral-700 hover:bg-neutral-200"
           aria-label="New bullet"
         >
-          • New
+          {bulletFor(0)} New
         </button>
         <button
           type="button"
@@ -199,7 +227,7 @@ interface BulletMatch {
 }
 
 function matchBulletPrefix(line: string): BulletMatch | null {
-  const m = line.match(/^(\s*)([-*+]\s+|\d+\.\s+)/);
+  const m = line.match(/^(\s*)([●○◦]\s+|[-*+]\s+|\d+\.\s+)/);
   if (!m) return null;
   return { indent: m[1], marker: m[2] };
 }
