@@ -78,6 +78,20 @@ export class GithubClient {
     });
   }
 
+  async listDirRecursive(path: string): Promise<DirEntry[]> {
+    const out: DirEntry[] = [];
+    const stack = [path];
+    while (stack.length > 0) {
+      const cur = stack.pop()!;
+      const entries = await this.listDir(cur);
+      for (const e of entries) {
+        if (e.type === 'dir') stack.push(e.path);
+        else out.push(e);
+      }
+    }
+    return out;
+  }
+
   async listDir(path: string): Promise<DirEntry[]> {
     try {
       const res = await this.octokit.repos.getContent({

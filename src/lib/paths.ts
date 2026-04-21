@@ -1,8 +1,10 @@
 export const ROOT = 'movies';
+export const ARCHIVE_ROOT = 'archive';
 
 export const globalBrainstormingPath = () => 'brainstorming.md';
 
 export const projectDir = (slug: string) => `${ROOT}/${slug}`;
+export const archiveProjectDir = (slug: string, stamp: string) => `${ARCHIVE_ROOT}/${slug}-${stamp}`;
 export const projectMetaPath = (slug: string) => `${projectDir(slug)}/project.json`;
 export const outlinePath = (slug: string) => `${projectDir(slug)}/outline.md`;
 export const projectBrainstormPath = (slug: string) => `${projectDir(slug)}/brainstorming.md`;
