@@ -114,6 +114,18 @@ export class GithubClient {
     }
   }
 
+  async getRateLimit(): Promise<{ limit: number; remaining: number; reset: number } | null> {
+    try {
+      const res = await this.octokit.request('GET /rate_limit');
+      const core = (res.data as { resources?: { core?: { limit: number; remaining: number; reset: number } } })
+        ?.resources?.core;
+      if (!core) return null;
+      return { limit: core.limit, remaining: core.remaining, reset: core.reset };
+    } catch {
+      return null;
+    }
+  }
+
   async verify(): Promise<{ ok: boolean; message: string }> {
     try {
       await this.octokit.repos.get({ owner: this.owner, repo: this.repo });

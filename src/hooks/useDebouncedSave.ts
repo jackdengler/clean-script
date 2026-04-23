@@ -13,6 +13,7 @@ interface Opts<T> {
 export function useDebouncedSave<T>({ value, initial, onSave, delayMs = 1000, enabled = true }: Opts<T>) {
   const [state, setState] = useState<SaveState>('idle');
   const [error, setError] = useState<string | null>(null);
+  const [lastSavedAt, setLastSavedAt] = useState<number | null>(null);
   const lastSavedRef = useRef<T | null>(initial);
   const valueRef = useRef<T>(value);
   valueRef.current = value;
@@ -29,6 +30,7 @@ export function useDebouncedSave<T>({ value, initial, onSave, delayMs = 1000, en
         setState('saving');
         await onSave(valueRef.current);
         lastSavedRef.current = valueRef.current;
+        setLastSavedAt(Date.now());
         setState('saved');
         setError(null);
       } catch (e: unknown) {
@@ -39,7 +41,7 @@ export function useDebouncedSave<T>({ value, initial, onSave, delayMs = 1000, en
     return () => clearTimeout(handle);
   }, [value, enabled, delayMs, onSave]);
 
-  return { state, error };
+  return { state, error, lastSavedAt };
 }
 
 function equal<T>(a: T, b: T): boolean {
