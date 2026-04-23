@@ -2,39 +2,29 @@ import { useEffect, useState } from 'react';
 import { useParams } from 'react-router-dom';
 import { ProjectLayout } from '../../components/ProjectLayout';
 import { SaveStatus } from '../../components/Layout';
-import { RichEditor } from '../../components/RichEditor';
+import { SectionedList } from '../../components/SectionedList';
 import { useGithubFile, usePutFile } from '../../hooks/useGithubFile';
 import { useDebouncedSave } from '../../hooks/useDebouncedSave';
 import { tabPath, type TabKind } from '../../lib/paths';
 
 interface Props {
   kind: TabKind;
-  placeholder?: string;
   commitLabel: string;
+  itemLabel: string;
+  addLabel: string;
+  reorderable?: boolean;
+  emptyHint?: string;
 }
 
-export function MarkdownTab({ kind, placeholder, commitLabel }: Props) {
+export function SectionedTab(props: Props) {
   const { slug = '' } = useParams();
-  const path = tabPath(slug, kind);
-  return (
-    <TabEditor
-      key={path}
-      slug={slug}
-      path={path}
-      placeholder={placeholder}
-      commitLabel={commitLabel}
-    />
-  );
+  const path = tabPath(slug, props.kind);
+  return <Inner {...props} key={path} slug={slug} path={path} />;
 }
 
-interface EditorProps {
-  slug: string;
-  path: string;
-  placeholder?: string;
-  commitLabel: string;
-}
-
-function TabEditor({ slug, path, placeholder, commitLabel }: EditorProps) {
+function Inner({
+  slug, path, commitLabel, itemLabel, addLabel, reorderable, emptyHint,
+}: Props & { slug: string; path: string }) {
   const { data, isLoading } = useGithubFile(path);
   const put = usePutFile();
   const [text, setText] = useState('');
@@ -62,7 +52,14 @@ function TabEditor({ slug, path, placeholder, commitLabel }: EditorProps) {
       {isLoading && initial === null ? (
         <div className="text-sm text-neutral-500">Loading…</div>
       ) : (
-        <RichEditor value={text} onChange={setText} placeholder={placeholder} />
+        <SectionedList
+          value={text}
+          onChange={setText}
+          reorderable={reorderable}
+          addLabel={addLabel}
+          itemLabel={itemLabel}
+          emptyHint={emptyHint}
+        />
       )}
     </ProjectLayout>
   );

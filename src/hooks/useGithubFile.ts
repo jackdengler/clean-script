@@ -1,5 +1,6 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useClient } from '../context/ConfigContext';
+import { enqueue, isNetworkError } from '../lib/offlineQueue';
 
 export function useGithubFile(path: string | null) {
   const client = useClient();
@@ -13,12 +14,28 @@ export function useGithubFile(path: string | null) {
   });
 }
 
+function isOnline(): boolean {
+  return typeof navigator === 'undefined' ? true : navigator.onLine;
+}
+
 export function usePutFile() {
   const client = useClient();
   const qc = useQueryClient();
   return useMutation({
     mutationFn: async ({ path, content, message }: { path: string; content: string; message: string }) => {
-      await client.putFile(path, content, message);
+      if (!isOnline()) {
+        enqueue({ kind: 'put', path, content, message });
+        return;
+      }
+      try {
+        await client.putFile(path, content, message);
+      } catch (err) {
+        if (isNetworkError(err)) {
+          enqueue({ kind: 'put', path, content, message });
+          return;
+        }
+        throw err;
+      }
     },
     onSuccess: (_data, vars) => {
       qc.invalidateQueries({ queryKey: ['file', vars.path] });
@@ -34,7 +51,19 @@ export function useDeleteFile() {
   const qc = useQueryClient();
   return useMutation({
     mutationFn: async ({ path, message }: { path: string; message: string }) => {
-      await client.deleteFile(path, message);
+      if (!isOnline()) {
+        enqueue({ kind: 'delete', path, message });
+        return;
+      }
+      try {
+        await client.deleteFile(path, message);
+      } catch (err) {
+        if (isNetworkError(err)) {
+          enqueue({ kind: 'delete', path, message });
+          return;
+        }
+        throw err;
+      }
     },
     onSuccess: (_data, vars) => {
       qc.invalidateQueries({ queryKey: ['file', vars.path] });

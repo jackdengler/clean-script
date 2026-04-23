@@ -7,10 +7,10 @@ export function Setup() {
   const { setConfig } = useConfig();
   const navigate = useNavigate();
   const [token, setToken] = useState('');
-  const [owner, setOwner] = useState('jackdengler');
-  const [repo, setRepo] = useState('private-data-storage');
+  const [owner, setOwner] = useState('');
+  const [repo, setRepo] = useState('');
   const [branch, setBranch] = useState('main');
-  const [basePath, setBasePath] = useState('clean-script');
+  const [basePath, setBasePath] = useState('');
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
 

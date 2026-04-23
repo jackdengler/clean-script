@@ -9,6 +9,8 @@ import { ProjectList } from './pages/ProjectList';
 import { GlobalBrainstorming } from './pages/GlobalBrainstorming';
 import { NewProject } from './pages/NewProject';
 import { MarkdownTab } from './pages/tabs/MarkdownTab';
+import { SectionedTab } from './pages/tabs/SectionedTab';
+import { OfflineBadge } from './components/OfflineBadge';
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -33,6 +35,7 @@ export function App() {
     >
       <ConfigProvider>
         <HashRouter>
+          <OfflineBadge />
           <Shell />
         </HashRouter>
       </ConfigProvider>
@@ -62,9 +65,9 @@ function Shell() {
 
       <Route path="/p/:slug" element={<Navigate to="brainstorming" replace />} />
       <Route path="/p/:slug/brainstorming" element={<MarkdownTab kind="brainstorming" commitLabel="update brainstorming" placeholder="Themes, what-ifs, half-ideas. Use bullets — hit return to add more." />} />
-      <Route path="/p/:slug/characters" element={<MarkdownTab kind="characters" commitLabel="update characters" />} />
-      <Route path="/p/:slug/scenes" element={<MarkdownTab kind="scenes" commitLabel="update scenes" />} />
-      <Route path="/p/:slug/locations" element={<MarkdownTab kind="locations" commitLabel="update locations" />} />
+      <Route path="/p/:slug/characters" element={<SectionedTab kind="characters" commitLabel="update characters" itemLabel="character" addLabel="Add character" emptyHint="No characters yet. Each card becomes one character." />} />
+      <Route path="/p/:slug/scenes" element={<SectionedTab kind="scenes" commitLabel="update scenes" itemLabel="scene" addLabel="Add scene" reorderable emptyHint="No scenes yet. Drag to reorder once you have more than one." />} />
+      <Route path="/p/:slug/locations" element={<SectionedTab kind="locations" commitLabel="update locations" itemLabel="location" addLabel="Add location" />} />
       <Route path="/p/:slug/music" element={<MarkdownTab kind="music" commitLabel="update music" />} />
 
       <Route path="*" element={<Navigate to="/" replace />} />

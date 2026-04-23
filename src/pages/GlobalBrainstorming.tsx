@@ -21,7 +21,7 @@ export function GlobalBrainstorming() {
     }
   }, [data, initial]);
 
-  const { state } = useDebouncedSave({
+  const { state, lastSavedAt } = useDebouncedSave({
     value: text,
     initial,
     enabled: initial !== null,
@@ -34,7 +34,7 @@ export function GlobalBrainstorming() {
     <Layout
       title="General Brainstorming"
       back="/"
-      right={<SaveStatus state={state} />}
+      right={<SaveStatus state={state} lastSavedAt={lastSavedAt} />}
     >
       {isLoading && initial === null ? (
         <div className="text-sm text-neutral-500">Loading…</div>

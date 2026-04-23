@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useRef, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { Layout } from '../components/Layout';
@@ -7,13 +7,17 @@ import { useProjects } from '../hooks/useProjects';
 import { useClient } from '../context/ConfigContext';
 import { archiveProject } from '../lib/archive';
 import type { ProjectMeta } from '../lib/project';
+import { exportProjectZip, importProjectZip, triggerDownload } from '../lib/projectIO';
 
 export function ProjectList() {
   const { data, isLoading, error } = useProjects();
   const client = useClient();
   const qc = useQueryClient();
   const [deletingSlug, setDeletingSlug] = useState<string | null>(null);
+  const [exportingSlug, setExportingSlug] = useState<string | null>(null);
+  const [importBusy, setImportBusy] = useState(false);
   const [notice, setNotice] = useState<string | null>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   const del = useMutation({
     mutationFn: async (project: ProjectMeta) => {
@@ -41,10 +45,60 @@ export function ProjectList() {
     del.mutate(project);
   }
 
+  async function handleExport(project: ProjectMeta) {
+    try {
+      setExportingSlug(project.slug);
+      const blob = await exportProjectZip(client, project.slug);
+      triggerDownload(blob, `${project.slug}.zip`);
+      setNotice(`Exported “${project.title || project.slug}” as .zip`);
+    } catch (err) {
+      alert((err as { message?: string })?.message ?? 'Export failed');
+    } finally {
+      setExportingSlug(null);
+    }
+  }
+
+  async function handleImport(file: File) {
+    try {
+      setImportBusy(true);
+      const result = await importProjectZip(client, file);
+      qc.invalidateQueries({ queryKey: ['projects'] });
+      setNotice(`Imported “${result.title}” as ${result.slug}`);
+    } catch (err) {
+      alert((err as { message?: string })?.message ?? 'Import failed');
+    } finally {
+      setImportBusy(false);
+      if (fileInputRef.current) fileInputRef.current.value = '';
+    }
+  }
+
   return (
     <Layout
       title="Movie Planner"
-      right={<Link to="/projects/new" className="btn-primary text-sm">+ New</Link>}
+      right={
+        <div className="flex items-center gap-2">
+          <input
+            ref={fileInputRef}
+            type="file"
+            accept=".zip,application/zip"
+            className="sr-only"
+            onChange={(e) => {
+              const f = e.target.files?.[0];
+              if (f) handleImport(f);
+            }}
+          />
+          <button
+            type="button"
+            className="btn-secondary text-sm"
+            onClick={() => fileInputRef.current?.click()}
+            disabled={importBusy}
+            title="Import a project .zip"
+          >
+            {importBusy ? 'Importing…' : 'Import'}
+          </button>
+          <Link to="/projects/new" className="btn-primary text-sm">+ New</Link>
+        </div>
+      }
     >
       <Link
         to="/brainstorming"
@@ -87,7 +141,9 @@ export function ProjectList() {
               key={p.slug}
               project={p}
               onDelete={handleDelete}
+              onExport={handleExport}
               busy={deletingSlug === p.slug}
+              exporting={exportingSlug === p.slug}
             />
           ))}
         </div>
