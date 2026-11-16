@@ -8,7 +8,7 @@ export default defineConfig({
     react(),
     VitePWA({
       registerType: 'autoUpdate',
-      includeAssets: ['favicon.svg'],
+      includeAssets: ['favicon.svg', 'apple-touch-icon.png'],
       manifest: {
         name: 'Movie Planner',
         short_name: 'Movies',
@@ -20,8 +20,9 @@ export default defineConfig({
         scope: '/clean-script/',
         start_url: '/clean-script/',
         icons: [
-          { src: 'favicon.svg', sizes: 'any', type: 'image/svg+xml', purpose: 'any' },
-          { src: 'favicon.svg', sizes: 'any', type: 'image/svg+xml', purpose: 'maskable' },
+          { src: 'planr-192.png', sizes: '192x192', type: 'image/png', purpose: 'any' },
+          { src: 'planr-512.png', sizes: '512x512', type: 'image/png', purpose: 'any' },
+          { src: 'planr-maskable-512.png', sizes: '512x512', type: 'image/png', purpose: 'maskable' },
         ],
       },
       workbox: {
